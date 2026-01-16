@@ -1,0 +1,474 @@
+{
+  "name": "(2) Auto Accept Invitation & Join Meeting",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb21149b-1f25-4993-914d-0c7e41b99538",
+              "name": "botBackendUrl",
+              "value": "https://teams-meeting-notetaker.onrender.com",
+              "type": "string"
+            },
+            {
+              "id": "f2965102-ec3a-4c29-be97-b55a5880f9e9",
+              "name": "katie_email",
+              "value": "KatieZ@masterstouchweb.com",
+              "type": "string"
+            },
+            {
+              "id": "99533240-c9e3-4b37-9ccb-ae4cf2847608",
+              "name": "allowList",
+              "value": "['jake@masterstouchweb.com']",
+              "type": "array"
+            },
+            {
+              "id": "2c3c8561-3fd6-4348-aa5b-c9be0a7fbea7",
+              "name": "secret_key",
+              "value": "super-secret-key",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        352
+      ],
+      "id": "f0d6aa4c-f4c0-4473-beff-e2c05fb7bd0f",
+      "name": "Workflow Configuration"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const data = $('Extract Meeting Details').item.json;\nconst organizer = data.organizer;\nconst allowList = $('Workflow Configuration').item.json.allowList;\n\nif (allowList.includes(organizer) || organizer.includes('@masterstouchweb.com')) {\n  return {\n    json: {\n      ...data\n    }\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        352
+      ],
+      "id": "1fb06266-413d-4776-9d7c-8788548399c7",
+      "name": "Check Organizer Allowlist"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/events/{{ $json.meetingId }}/accept\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1440,
+        352
+      ],
+      "id": "34f78e7c-aec4-4a8d-ad25-bfd836e02ed2",
+      "name": "Accept Meeting Invites",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ new Date(new Date($('Extract Meeting Details').item.json.startTime).getTime() - 60 * 1000).toISOString() }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1904,
+        352
+      ],
+      "id": "620f89ed-fc3c-47bf-88bd-49014cfe0751",
+      "name": "Wait",
+      "webhookId": "b80526d4-4777-437b-8e86-169b17e80674"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "028c40d9-01cf-46b8-bbfd-11ba032c966d",
+              "leftValue": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1664,
+        352
+      ],
+      "id": "a32af068-b7be-4877-b8ad-f2bd9abac382",
+      "name": "Join URL Exists?"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "processed": 0,
+            "meetingId": "={{ $('Extract Meeting Details').item.json.meetingId }}",
+            "subject": "={{ $('Extract Meeting Details').item.json.subject\n}}",
+            "startTime": "={{ $('Extract Meeting Details').item.json.startTime }}",
+            "endTime": "={{ $('Extract Meeting Details').item.json.endTime }}",
+            "joinUrl": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
+            "attendees": "={{ $('Extract Meeting Details').item.json.attendeesStr }}",
+            "recallBotId": "={{ $json.recallBotId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recallBotId",
+              "displayName": "recallBotId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2336,
+        352
+      ],
+      "id": "97c69769-7b5e-4c91-9a31-9efe4c23bae9",
+      "name": "Store Meeting"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').item.json.botBackendUrl + '/joinMeeting' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $('Workflow Configuration').first().json.secret_key}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "meetingId",
+              "value": "={{ $('Extract Meeting Details').item.json.meetingId }}"
+            },
+            {
+              "name": "joinUrl",
+              "value": "={{ $('Extract Meeting Details').item.json.joinUrl }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('Extract Meeting Details').item.json.startTime }}"
+            },
+            {
+              "name": "endTime",
+              "value": "={{ $('Extract Meeting Details').item.json.endTime }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $('Extract Meeting Details').item.json.subject }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2128,
+        352
+      ],
+      "id": "257216c3-0991-4bc9-8b3c-9505c3953168",
+      "name": "Join Meeting Online(Teams)",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c055762a-8fe7-4141-a639-df2372f30060",
+      "typeVersion": 1.1,
+      "name": "When Executed by \"Event Invitation Listener\"",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        560,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const meeting = $input.first().json;\n\nif (meeting) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      subject: meeting.subject,\n      startTime: meeting.start.dateTime,\n      endTime: meeting.end.dateTime,\n      organizer: meeting.organizer.emailAddress.address,\n      joinUrl: meeting.onlineMeeting.joinUrl,\n      attendees: meeting.attendees,\n      attendeesStr: JSON.stringify(meeting.attendees.map(item => item.emailAddress.address))\n    }\n  }\n}\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        352
+      ],
+      "id": "36aef967-f37b-43c8-a194-12442718855b",
+      "name": "Extract Meeting Details"
+    },
+    {
+      "parameters": {
+        "content": "## Auto Accept Invitation & Join Meeting\n### The flow automates the process of handling an incoming meeting invite, verifying details, waiting for the appropriate time, and finally joining the meeting online to potentially store meeting data.",
+        "height": 432,
+        "width": 2176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "cee36339-c47b-4499-a0b2-8cac39721288",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Check Organizer Allowlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Organizer Allowlist": {
+      "main": [
+        [
+          {
+            "node": "Accept Meeting Invites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accept Meeting Invites": {
+      "main": [
+        [
+          {
+            "node": "Join URL Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Join Meeting Online(Teams)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join URL Exists?": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join Meeting Online(Teams)": {
+      "main": [
+        [
+          {
+            "node": "Store Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by \"Event Invitation Listener\"": {
+      "main": [
+        [
+          {
+            "node": "Extract Meeting Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Meeting Details": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e6d7b110-3b0f-4b16-864f-003e41494fa3",
+  "meta": {
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "tqFVNLoqGQTQOFO3",
+  "tags": []
+}

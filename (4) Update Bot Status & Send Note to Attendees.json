@@ -1,0 +1,863 @@
+{
+  "name": "(4) Update Bot Status & Send Note to Attendees",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "meetingId",
+              "keyValue": "={{ $json.body.meetingId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "join_timestamp": "={{ $json.body.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -96
+      ],
+      "id": "db37f3d5-fab6-476d-8135-c14d2cbe5e6a",
+      "name": "Update Join Timestamp"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "meetingId",
+              "keyValue": "={{ $json.body.meetingId }}"
+            },
+            {
+              "keyName": "left_timestamp",
+              "keyValue": "={{ null }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "left_timestamp": "={{ $json.body.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        96
+      ],
+      "id": "a259ff01-0f67-4633-8696-58c3a4624eab",
+      "name": "Update Left Timestamp"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "12bdb8f8-23ba-41ab-a5c9-88888154c114",
+              "name": "botBackendUrl",
+              "value": "=https://teams-meeting-notetaker.onrender.com",
+              "type": "string"
+            },
+            {
+              "id": "539cabbe-e63f-4020-9317-4ce22792925f",
+              "name": "secret_key",
+              "value": "super-secret-key",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        80
+      ],
+      "id": "b7fac66e-c544-4656-bcc7-237804e0fc1f",
+      "name": "Workflow Configuration"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "processed",
+              "keyValue": "0"
+            },
+            {
+              "keyName": "left_timestamp",
+              "condition": "neq",
+              "keyValue": "={{ null }}"
+            },
+            {
+              "keyName": "recallBotId",
+              "keyValue": "={{ $('Update Left Timestamp').item.json.recallBotId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        80
+      ],
+      "id": "56d49198-77a2-418a-964f-9f63f4fbc934",
+      "name": "Get Candidate Meeting Ready for Notes"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input item\nconst item = $input.first().json;\n\n// ---- CONFIG ----\nconst WORDS_PER_HOUR = 600;\nconst MIN_WORD_LIMIT = 150;\n\n// ---- DURATION ----\n// Expecting duration in minutes (adjust if needed)\nconst durationMinutes = Number(item.durationMinutes || 0);\n\n// Convert to hours\nconst durationHours = durationMinutes / 60;\n\n// Calculate word limit\nlet wordLimit = Math.round(durationHours * WORDS_PER_HOUR);\n\n// Safeguards\nif (!wordLimit || wordLimit < MIN_WORD_LIMIT) {\n  wordLimit = MIN_WORD_LIMIT;\n}\n\n// ---- EFFECTIVE LEAVE ----\n// You can expand this logic as needed\nconst effectiveLeave =\n  item.onLeave === true ||\n  item.cancelled === true ||\n  item.status === \"cancelled\";\n\n// ---- OUTPUT ----\nreturn [\n  {\n    json: {\n      ...item,\n      durationHours,\n      wordLimit,\n      effectiveLeave,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        80
+      ],
+      "id": "aca28a93-b39f-4939-a3aa-0f8f67576255",
+      "name": "Compute WordLimit + EffectiveLeave"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.botBackendUrl }}/getTranscript",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $('Workflow Configuration').first().json.secret_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "meetingId",
+              "value": "={{ $json.meetingId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1584,
+        80
+      ],
+      "id": "082d5461-fc3a-4981-921a-fb077988ff8f",
+      "name": "Get Transcript",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json }}",
+        "options": {
+          "systemMessage": "=Generate professional meeting notes in the following format and structure.\n\nYou are a female assistant.\nKeep the tone friendly and conversational, yet professional.\n\nIf the transcript quality is poor or unclear, add one single sentence at the very top of the body noting this, followed by a blank line, then continue with the summary using best judgment.\n\nCONTENT REQUIREMENTS\n\nThe body MUST be formatted using explicit newline characters (\\n).\n\nOverview:\nWrite 2–3 concise sentences.\nEnd the section with two newlines.\n\nKey Decisions:\n- Each decision on its own line starting with a dash.\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nAction Items:\n- [Task] - Assigned to: [Person] - Due: [Date if mentioned]\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nDiscussion Points:\n- Each discussion topic on its own line starting with a dash.\n\nSTYLE GUIDELINES\n- Keep notes concise but informative.\n- Focus on outcomes and action items.\n- Friendly, conversational, professional tone.\n- No negative or critical content.\n- Do not invent facts or opinions.\n\nHIGHLIGHTS\n- Clearly surface customer pain points, commitments, pricing discussions, and next steps when present.\n\nLENGTH CONSTRAINT\n- Limit output to {{ $('Compute WordLimit + EffectiveLeave').item.json.wordLimit }} words.\n\nOUTPUT FORMAT\nReturn ONLY valid JSON.\n\nExample structure (use real content, not placeholders):\n\n{\n  \"subject\": \"Meeting Notes\",\n  \"body\": \"Transcript quality was unclear, so this summary is based on best judgment.\\n\\nOverview:\\nSentence one. Sentence two.\\n\\nKey Decisions:\\n- Decision one\\n- Decision two\\n\\nAction Items:\\n- Task description - Assigned to: Name - Due: Date\\n\\nDiscussion Points:\\n- Topic one with brief context\\n- Topic two with brief context\"\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1792,
+        80
+      ],
+      "id": "18231caa-f6f6-4156-85cf-55b26efa10a0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "grok-4-0709",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        288
+      ],
+      "id": "660da521-8ebb-4151-bcf1-35ff91fea63f",
+      "name": "xAI Grok Chat Model",
+      "credentials": {
+        "xAiApi": {
+          "id": "uWCMDM7urVwkWQvW",
+          "name": "xAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get raw output string\nconst raw = $json.output;\n\n// Remove markdown code block markers\nconst cleaned = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Parse JSON\nconst parsed = JSON.parse(cleaned);\n\n// Ensure line breaks are real (handles double-escaped cases)\nif (typeof parsed.body === 'string') {\n  parsed.body = parsed.body.replace(/\\\\n/g, '\\n');\n}\n\n// Return formatted structure exactly as AI produced it\nreturn [\n  {\n    json: {\n      subject: parsed.subject,\n      body: parsed.body\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        80
+      ],
+      "id": "fe130064-9a6f-4d5a-b368-35e6edf11115",
+      "name": "Parse Output"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().join(',') }}",
+        "subject": "={{ $json.subject }}",
+        "bodyContent": "={{ $json.body }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        80
+      ],
+      "id": "67540382-7be5-431a-8fa3-ce2cffe33db5",
+      "name": "Send Note to Attendees",
+      "webhookId": "56c12787-ced6-41e6-b6ed-17353c1e6982",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "recallBotId",
+              "keyValue": "={{ $('Update Left Timestamp').item.json.recallBotId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "processed": 1
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recallBotId",
+              "displayName": "recallBotId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        80
+      ],
+      "id": "9310b4b3-aae4-4338-9582-e9848bb6844c",
+      "name": "Update Table (processed = 1)"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "katie/bot-status",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b02702b1-3652-4dbb-8af3-8b02716f627e",
+      "name": "Recall Bot Status Webhook",
+      "webhookId": "a2c181e3-c40b-400d-acb0-9de3b8893422"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.status }}",
+                    "rightValue": "joined",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9ce2b108-92c6-4b63-bec6-e015165ae474"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "93b300ff-a9a2-455a-8489-64340575ab65",
+                    "leftValue": "={{ $json.body.status }}",
+                    "rightValue": "left",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        0
+      ],
+      "id": "e82d878e-492b-4803-9f0e-098b92ab406e",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "# Update Bot Status & Send Note to Attendees\n## This n8n workflow manages a meeting bot's status and actions. It splits incoming requests based on a Switch condition, updating either the join timestamp or the left timestamp of a meeting. The main sequence prepares meeting data, computes effective leave data, gets a transcript, processes the information using an AI Agent, parses the output, sends notifications to attendees, and finally stores the processed data in a table.",
+        "height": 784,
+        "width": 2688
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "ccf97a14-61ab-46d7-8da3-757710d14626",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get Candidate Meeting Ready for Notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Candidate Meeting Ready for Notes": {
+      "main": [
+        [
+          {
+            "node": "Compute WordLimit + EffectiveLeave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute WordLimit + EffectiveLeave": {
+      "main": [
+        [
+          {
+            "node": "Get Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transcript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "xAI Grok Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Output": {
+      "main": [
+        [
+          {
+            "node": "Send Note to Attendees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Note to Attendees": {
+      "main": [
+        [
+          {
+            "node": "Update Table (processed = 1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Left Timestamp": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recall Bot Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update Join Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Left Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "62a99c54-d812-4641-bcab-192626c151c7",
+  "meta": {
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "t63tNbhbAo60NchKEQQAm",
+  "tags": []
+}

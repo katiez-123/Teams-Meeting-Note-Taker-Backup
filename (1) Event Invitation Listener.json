@@ -1,0 +1,381 @@
+{
+  "name": "(1) Event Invitation Listener",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "foldersToInclude": [
+            "AAMkADA3YTJiMzNhLWYzMTYtNDM4YS04NTMxLTE3YzAzNDIzMjkzZQAuAAAAAAA2xcWbuqD8TJ_2ZWxqajfyAQAfgpJqZGTZQ4_gBmxc-X8sAAA_ph3HAAA="
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        240
+      ],
+      "id": "8f03e272-4ed2-446e-a49f-94dea53d1bb0",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tqFVNLoqGQTQOFO3",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tqFVNLoqGQTQOFO3",
+          "cachedResultName": "(1) Auto Accept Invitation & Join Meeting"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        -32
+      ],
+      "id": "195a2543-9d71-4778-86e3-59a1c66d91c0",
+      "name": "Call 'Auto Accept Invitation & Join Meeting'"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -288,
+        -144
+      ],
+      "id": "ee5428a9-34ff-406d-b3cf-edd8d0f7b015",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/calendarView?startDateTime={{ new Date(new Date().setHours(0,0,0,0)).toISOString() }}&endDateTime={{ new Date(new Date().setHours(23,59,59,999)).toISOString() }}&$filter=isCancelled eq false&$orderby=start/dateTime\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -64,
+        -144
+      ],
+      "id": "eac7f211-f2db-471f-8044-a5ed22c5d48e",
+      "name": "Get Today's Meetings",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -144
+      ],
+      "id": "733fbfdb-797f-4ff9-92f2-7e8fbf485848",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -144
+      ],
+      "id": "40bea947-3532-4488-bbc0-32abd83ea22e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/messages/{{ $json.id }}?$expand=microsoft.graph.eventMessage/event",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -64,
+        240
+      ],
+      "id": "2da2c134-3c7e-41dc-9f66-f1de606d3bc3",
+      "name": "Get Invite Email",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/events?$filter=uid eq '{{ $json.event.iCalUId }}' and isCancelled eq false",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        144,
+        240
+      ],
+      "id": "c7e61885-a75b-4d84-9f81-b77906206e3c",
+      "name": "Get Metadata of Meeting",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        336,
+        240
+      ],
+      "id": "76d26644-d90d-4bd6-bb93-1f46f219f134",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tqFVNLoqGQTQOFO3",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tqFVNLoqGQTQOFO3",
+          "cachedResultName": "(1) Auto Accept Invitation & Join Meeting"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        928,
+        240
+      ],
+      "id": "cf204139-1dcd-463c-b7fa-5f529f5aaf0d",
+      "name": "Call 'Auto Accept Invitation & Join Meeting'1"
+    },
+    {
+      "parameters": {
+        "content": "## Scheduled Daily Meeting Sync\n### This workflow runs daily at 5 am to proactively check and schedule the bot to join all meetings known for the current day.\nIt ensures the bot never misses a meeting, even if the initial invite was missed or the system restarted.",
+        "height": 368,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "1357936f-f877-4955-9836-99d1e28b46fa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## \tNew Invitation Handler\n### This path is triggered instantly upon receiving a new invitation email. It extracts the event details and hands off the data to the auto-join sub-workflow.",
+        "height": 416,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "03f232db-1e89-448b-b66e-ef2e5187956c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Sub-workflow Handoff\n### This node calls the central \"Bot Join\" sub-workflow asynchronously to execute the wait/join logic independently for each meeting instance.",
+        "height": 800,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "be40a583-3215-4037-b8ec-4d1ba77d724c",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Invite Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Today's Meetings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Today's Meetings": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'Auto Accept Invitation & Join Meeting'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Auto Accept Invitation & Join Meeting'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invite Email": {
+      "main": [
+        [
+          {
+            "node": "Get Metadata of Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Metadata of Meeting": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Call 'Auto Accept Invitation & Join Meeting'1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "48d80060-fc70-4f7e-ab6a-71003fb65b08",
+  "meta": {
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "9-xJX8x_b3w9X1v1owpZb",
+  "tags": []
+}

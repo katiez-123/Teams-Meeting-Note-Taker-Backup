@@ -1,0 +1,578 @@
+{
+  "name": "(3) Meeting Invite Email Listener for Live Join",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ad4b106-0d59-4b3f-a807-9a13f7f0544e",
+              "name": "botBackendUrl",
+              "value": "https://teams-meeting-notetaker.onrender.com",
+              "type": "string"
+            },
+            {
+              "id": "a26369f9-39e2-43a4-a425-1ae4867a609a",
+              "name": "secret_key",
+              "value": "super-secret-key",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        0
+      ],
+      "id": "bba50190-2610-4b12-a177-d0cf2a9e555c",
+      "name": "Workflow Configuration"
+    },
+    {
+      "parameters": {
+        "url": "https://graph.microsoft.com/v1.0/me/messages?&$filter=receivedDateTime ge 1900-01-01T00:00:00Z and contains(subject,'Join Teams meeting')&$orderby=receivedDateTime desc&$top=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        400,
+        0
+      ],
+      "id": "54e5ca26-2f97-49b0-9dc0-36a019d4f86d",
+      "name": "Get Invite Email",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email_id",
+              "keyValue": "={{ $json.value[0].id }}"
+            },
+            {
+              "keyName": "isEmailRead",
+              "keyValue": "true"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        0
+      ],
+      "id": "db06fb54-e24d-4cec-9520-bff2b58bdf41",
+      "name": "Not Read?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $json.email_id }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "isRead": true
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "4d3b7707-d126-45cd-a40c-ccda144c404a",
+      "name": "Update Email as Read",
+      "webhookId": "edb881ed-5946-445e-9b38-61c81443ff32",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = $('Get Invite Email').first().json.value[0];\n\n// Get email body (adjust field if your data uses a different path)\nconst body = email.bodyPreview;\n\n// Regex to match Microsoft Teams meeting URLs\nconst teamsUrlRegex = /https:\\/\\/teams\\.microsoft\\.com\\/meet\\/[^\\s\"<]+/i;\n\n// Extract URL\nconst match = body.match(teamsUrlRegex);\n\nreturn [\n  {\n    json: {\n      joinUrl: match ? match[0] : null,\n      email_id: email.id,\n      sender: email.sender.emailAddress.address\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        0
+      ],
+      "id": "f144a350-c8d4-4db0-a427-5f72ac623889",
+      "name": "Get Email Detail"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users/{{ $json.sender.emailAddress.address }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        32,
+        272
+      ],
+      "id": "df56b93c-9899-48c0-bc7d-2bc251d1d7ba",
+      "name": "Get User ID",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users/{{ $json.id }}/onlineMeetings?$filter=joinWebUrl eq '{{ $('Get Email Detail').item.json.joinUrl }}'",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        240,
+        272
+      ],
+      "id": "04e1fe0c-70b8-412b-a108-abae0c561f95",
+      "name": "Get Metadata of Meeting",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const meeting = $input.first().json.value[0];\nconst attendees = meeting.participants.attendees.map(item => (item.upn));\nattendees.push(meeting.participants.organizer.upn);\n\nif (meeting.joinWebUrl) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      startTime: meeting.startDateTime,\n      endTime: meeting.endDateTime,\n      joinUrl: meeting.joinUrl,\n      subject: meeting.subject,\n      organizer: meeting.participants.organizer.upn,\n      attendees: JSON.stringify(attendees)\n    },\n  };\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        272
+      ],
+      "id": "5a3a6f4c-3d37-4007-9396-2be960614d18",
+      "name": "Extract Meeting Details"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').item.json.botBackendUrl + '/joinMeeting' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $('Workflow Configuration').first().json.secret_key}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "meetingId",
+              "value": "={{ $('Extract Meeting Details').item.json.meetingId }}"
+            },
+            {
+              "name": "joinUrl",
+              "value": "={{ $('Extract Meeting Details').item.json.joinUrl }}"
+            },
+            {
+              "name": "startTime",
+              "value": "={{ $('Extract Meeting Details').item.json.startTime }}"
+            },
+            {
+              "name": "endTime",
+              "value": "={{ $('Extract Meeting Details').item.json.endTime }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $('Extract Meeting Details').item.json.subject }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        272
+      ],
+      "id": "497f40ec-6bc0-4020-82e6-191cebe2fcf4",
+      "name": "Join Meeting Online(Teams)",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "isEmailRead": true,
+            "meetingId": "={{ $('Extract Meeting Details').item.json.meetingId }}",
+            "subject": "={{ $('Extract Meeting Details').item.json.subject }}",
+            "startTime": "={{ $('Extract Meeting Details').item.json.startTime }}",
+            "endTime": "={{ $('Extract Meeting Details').item.json.endTime }}",
+            "joinUrl": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
+            "attendees": "={{ $('Extract Meeting Details').item.json.attendees }}",
+            "email_id": "={{ $('Get Email Detail').item.json.email_id }}",
+            "processed": 0,
+            "recallBotId": "={{ $json.recallBotId }}",
+            "organizer": "={{ $('Extract Meeting Details').item.json.organizer }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recallBotId",
+              "displayName": "recallBotId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isEmailRead",
+              "displayName": "isEmailRead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "organizer",
+              "displayName": "organizer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        272
+      ],
+      "id": "43b504b3-9b7e-40bf-9a4c-212247f7d57f",
+      "name": "Save Meeting"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "custom": "contains(subject, 'Join Teams meeting')"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "7abbf76c-63ce-40f4-a94e-294e35b2982a",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Meeting Invite Email Listener for Live Join\n### This workflow automatically listens for new Microsoft Teams meeting invitations received via email, extracts meeting details, updates the email status, and orchestrates the joining and saving of meeting data via a bot.",
+        "height": 656,
+        "width": 1728
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -272,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "73dbd9b8-99c5-42e4-982d-5192c9431e95",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get Invite Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invite Email": {
+      "main": [
+        [
+          {
+            "node": "Not Read?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Read?": {
+      "main": [
+        [
+          {
+            "node": "Get Email Detail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email Detail": {
+      "main": [
+        [
+          {
+            "node": "Update Email as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Email as Read": {
+      "main": [
+        [
+          {
+            "node": "Get User ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User ID": {
+      "main": [
+        [
+          {
+            "node": "Get Metadata of Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Metadata of Meeting": {
+      "main": [
+        [
+          {
+            "node": "Extract Meeting Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Meeting Details": {
+      "main": [
+        [
+          {
+            "node": "Join Meeting Online(Teams)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join Meeting Online(Teams)": {
+      "main": [
+        [
+          {
+            "node": "Save Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9e40812d-c835-4b35-a036-06a7889121aa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "rR8ZkzcPZXDeclBHloKkc",
+  "tags": []
+}
