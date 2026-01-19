@@ -301,6 +301,12 @@
               "name": "secret_key",
               "value": "super-secret-key",
               "type": "string"
+            },
+            {
+              "id": "06ec3c00-b73c-4e08-b8a0-1b07414b57fc",
+              "name": "katie_email",
+              "value": "KatieZ@masterstouchweb.com",
+              "type": "string"
             }
           ]
         },
@@ -309,8 +315,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        960,
-        80
+        1184,
+        96
       ],
       "id": "b7fac66e-c544-4656-bcc7-237804e0fc1f",
       "name": "Workflow Configuration"
@@ -339,7 +345,7 @@
             },
             {
               "keyName": "recallBotId",
-              "keyValue": "={{ $('Update Left Timestamp').item.json.recallBotId }}"
+              "keyValue": "={{ $('Update Left Timestamp').first().json.recallBotId }}"
             }
           ]
         }
@@ -347,8 +353,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1168,
-        80
+        1408,
+        96
       ],
       "id": "56d49198-77a2-418a-964f-9f63f4fbc934",
       "name": "Get Candidate Meeting Ready for Notes"
@@ -360,8 +366,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
-        80
+        1600,
+        96
       ],
       "id": "aca28a93-b39f-4939-a3aa-0f8f67576255",
       "name": "Compute WordLimit + EffectiveLeave"
@@ -393,8 +399,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1584,
-        80
+        1808,
+        96
       ],
       "id": "082d5461-fc3a-4981-921a-fb077988ff8f",
       "name": "Get Transcript",
@@ -404,16 +410,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json }}",
+        "text": "={{ { meetingId: $json.meetingId, transcriptText: $json.transcriptText, quality: $json.quality, organizer: $('Compute WordLimit + EffectiveLeave').item.json.organizer } }}",
         "options": {
-          "systemMessage": "=Generate professional meeting notes in the following format and structure.\n\nYou are a female assistant.\nKeep the tone friendly and conversational, yet professional.\n\nIf the transcript quality is poor or unclear, add one single sentence at the very top of the body noting this, followed by a blank line, then continue with the summary using best judgment.\n\nCONTENT REQUIREMENTS\n\nThe body MUST be formatted using explicit newline characters (\\n).\n\nOverview:\nWrite 2–3 concise sentences.\nEnd the section with two newlines.\n\nKey Decisions:\n- Each decision on its own line starting with a dash.\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nAction Items:\n- [Task] - Assigned to: [Person] - Due: [Date if mentioned]\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nDiscussion Points:\n- Each discussion topic on its own line starting with a dash.\n\nSTYLE GUIDELINES\n- Keep notes concise but informative.\n- Focus on outcomes and action items.\n- Friendly, conversational, professional tone.\n- No negative or critical content.\n- Do not invent facts or opinions.\n\nHIGHLIGHTS\n- Clearly surface customer pain points, commitments, pricing discussions, and next steps when present.\n\nLENGTH CONSTRAINT\n- Limit output to {{ $('Compute WordLimit + EffectiveLeave').item.json.wordLimit }} words.\n\nOUTPUT FORMAT\nReturn ONLY valid JSON.\n\nExample structure (use real content, not placeholders):\n\n{\n  \"subject\": \"Meeting Notes\",\n  \"body\": \"Transcript quality was unclear, so this summary is based on best judgment.\\n\\nOverview:\\nSentence one. Sentence two.\\n\\nKey Decisions:\\n- Decision one\\n- Decision two\\n\\nAction Items:\\n- Task description - Assigned to: Name - Due: Date\\n\\nDiscussion Points:\\n- Topic one with brief context\\n- Topic two with brief context\"\n}\n"
+          "systemMessage": "=Generate professional meeting notes in the following format and structure.\n\nYou are a female assistant.\nKeep the tone friendly and conversational, yet professional.\n\nIf the transcript quality is poor or unclear, add one single sentence at the very top of the body noting this, followed by a blank line, then continue with the summary using best judgment.\n\nCONTENT REQUIREMENTS\n\nThe body MUST be formatted using explicit newline characters (\\n).\n\nOverview:\nWrite 2–3 concise sentences.\nEnd the section with two newlines.\n\nKey Decisions:\n- Each decision on its own line starting with a dash.\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nAction Items:\n- [Task] - Assigned to: [Person] - Due: [Date if mentioned]\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nDiscussion Points:\n- Each discussion topic on its own line starting with a dash.\n\nSTYLE GUIDELINES\n- Keep notes concise but informative.\n- Focus on outcomes and action items.\n- Include organizer email.\n- Friendly, conversational, professional tone.\n- No negative or critical content.\n- Do not invent facts or opinions.\n\nHIGHLIGHTS\n- Clearly surface customer pain points, commitments, pricing discussions, and next steps when present.\n\nLENGTH CONSTRAINT\n- Limit output to {{ $('Compute WordLimit + EffectiveLeave').first().json.wordLimit }} words.\n\nOUTPUT FORMAT\nReturn ONLY valid JSON.\n\nExample structure (use real content, not placeholders):\n\n{\n  \"subject\": \"Teams Meeting Notes\",\n  \"body\": \"Organizer: John@masterstouchweb.com\\n\\nTranscript quality was unclear, so this summary is based on best judgment.\\n\\nOverview:\\nSentence one. Sentence two.\\n\\nKey Decisions:\\n- Decision one\\n- Decision two\\n\\nAction Items:\\n- Task description - Assigned to: Name - Due: Date\\n\\nDiscussion Points:\\n- Topic one with brief context\\n- Topic two with brief context\"\n}\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1792,
-        80
+        2032,
+        -16
       ],
       "id": "18231caa-f6f6-4156-85cf-55b26efa10a0",
       "name": "AI Agent"
@@ -426,8 +432,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
       "typeVersion": 1,
       "position": [
-        1792,
-        288
+        2032,
+        160
       ],
       "id": "660da521-8ebb-4151-bcf1-35ff91fea63f",
       "name": "xAI Grok Chat Model",
@@ -445,15 +451,15 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2144,
-        80
+        2368,
+        96
       ],
       "id": "fe130064-9a6f-4d5a-b368-35e6edf11115",
       "name": "Parse Output"
     },
     {
       "parameters": {
-        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().join(',') }}",
+        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().filter(email => email !== $('Workflow Configuration').first().json.katie_email).join(',') }}",
         "subject": "={{ $json.subject }}",
         "bodyContent": "={{ $json.body }}",
         "additionalFields": {}
@@ -461,8 +467,8 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        2352,
-        80
+        2576,
+        96
       ],
       "id": "67540382-7be5-431a-8fa3-ce2cffe33db5",
       "name": "Send Note to Attendees",
@@ -488,7 +494,7 @@
           "conditions": [
             {
               "keyName": "recallBotId",
-              "keyValue": "={{ $('Update Left Timestamp').item.json.recallBotId }}"
+              "keyValue": "={{ $('Update Left Timestamp').first().json.recallBotId }}"
             }
           ]
         },
@@ -618,8 +624,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2560,
-        80
+        2800,
+        96
       ],
       "id": "9310b4b3-aae4-4338-9582-e9848bb6844c",
       "name": "Update Table (processed = 1)"
@@ -705,8 +711,8 @@
     {
       "parameters": {
         "content": "# Update Bot Status & Send Note to Attendees\n## This n8n workflow manages a meeting bot's status and actions. It splits incoming requests based on a Switch condition, updating either the join timestamp or the left timestamp of a meeting. The main sequence prepares meeting data, computes effective leave data, gets a transcript, processes the information using an AI Agent, parses the output, sends notifications to attendees, and finally stores the processed data in a table.",
-        "height": 784,
-        "width": 2688
+        "height": 720,
+        "width": 3168
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
@@ -716,6 +722,245 @@
       "typeVersion": 1,
       "id": "ccf97a14-61ab-46d7-8da3-757710d14626",
       "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $('Compute WordLimit + EffectiveLeave').item.json.email_id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        3008,
+        96
+      ],
+      "id": "bd23670d-c9fc-4251-8cc4-f54f234e52ea",
+      "name": "Delete Invitation Email",
+      "webhookId": "6a8b4091-334f-47a8-9846-b258cd1d5e88",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "value",
+        "options": {}
+      },
+      "id": "cbcd5905-4c43-4d7d-b85a-f0aa3e04272f",
+      "name": "Split Out Teams",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        880,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.microsoft.com/v1.0/me/joinedTeams",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        640,
+        640
+      ],
+      "id": "f426db00-1fcd-4686-b054-eee95431ac38",
+      "name": "Get all Teams",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/teams/{{ $json.teamId }}/primaryChannel",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2448,
+        640
+      ],
+      "id": "7a2c962a-cb31-4f0a-9e59-9101d6bfc924",
+      "name": "Get Teams Primary Channel",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/teams/{{ $('Split Out Teams').item.json.id }}/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1104,
+        640
+      ],
+      "id": "2e165735-9a09-4b93-a0e6-4c408c5de1ec",
+      "name": "Get Client Teams Tags",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/teams/{{ $('Split Out Teams').item.json.id }}/tags/{{ $json.value[0].id }}/members",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1312,
+        640
+      ],
+      "id": "76798267-260c-45a6-85c3-68358dae4dd6",
+      "name": "Get Client Team Members",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const katie_email = $('Workflow Configuration').first().json.katie_email || \"KatieZ@masterstouchweb.com\";\nconst clientTeamMembers = $input.all();\nlet attendees = JSON.parse($('Get Candidate Meeting Ready for Notes').first().json.attendees);\nattendees = attendees.filter((item) => item !== katie_email);\n\nconst matchedTeams = [];\n\nclientTeamMembers.forEach((item) => {\n  if (attendees.includes(item.json.email)) {\n    if (\n      !matchedTeams.find(\n        (team) =>\n          team.teamId === item.json.teamId && team.email === item.json.email,\n      )\n    ) {\n      matchedTeams.push(item.json);\n    }\n  }\n});\n\nreturn matchedTeams;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        640
+      ],
+      "id": "4085e665-06b7-4fe5-8e3f-239bfc424c53",
+      "name": "Filter Teams to Post Note"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users/{{ $json.userId }}?$select=mail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1760,
+        640
+      ],
+      "id": "b68ebf61-4dd7-4e8d-81aa-b54fbc523870",
+      "name": "Get User Email",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const teams = $input.all();\n\nlet output = [];\n\nteams.forEach(team => {\n  const teamId = team.json[\"@odata.context\"]\n    .match(/teams\\('([^']+)'\\)/)?.[1];\n  team.json.value.forEach(member => {\n    output.push({\n      ...member,\n      teamId\n    })\n  })\n})\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        640
+      ],
+      "id": "704f79e5-3fd5-4ce9-b51e-41d9cd9a03d6",
+      "name": "Split Client Teams Members"
+    },
+    {
+      "parameters": {
+        "jsCode": "const clientTeamMembers = $('Split Client Teams Members').all();\nconst emails = $input.all();\n\nconst output = clientTeamMembers.map((item, index) => ({\n  ...item.json,\n  email: emails[index].json.mail                                                 \n}))\n\nreturn output;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        640
+      ],
+      "id": "2a0748fa-310a-4f6d-ba9b-790b6391f6da",
+      "name": "Add Email Address"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/teams/{{ $('Filter Teams to Post Note').item.json.teamId }}/channels/{{ $json.id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"body\": {\n    \"contentType\": \"html\",\n    \"content\": \"{{ \"<b>\" + $('Parse Output').first().json.subject + \"</b><br>\" + $('Parse Output').first().json.body.replace(/\\n/g, '<br>') }}\"\n  }\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2656,
+        640
+      ],
+      "id": "d4896c1b-9f8e-4a31-af12-d4478fcc18e5",
+      "name": "Post a Note to Teams",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Post the note to the Teams where the attendees belong.",
+        "height": 480,
+        "width": 3184
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        464
+      ],
+      "typeVersion": 1,
+      "id": "defd19c6-22a6-481f-a235-f8022d4a660f",
+      "name": "Sticky Note1"
     }
   ],
   "pinData": {},
@@ -847,6 +1092,127 @@
           }
         ]
       ]
+    },
+    "Update Table (processed = 1)": {
+      "main": [
+        [
+          {
+            "node": "Delete Invitation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Invitation Email": {
+      "main": [
+        [
+          {
+            "node": "Get all Teams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Teams": {
+      "main": [
+        [
+          {
+            "node": "Get Client Teams Tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all Teams": {
+      "main": [
+        [
+          {
+            "node": "Split Out Teams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Teams Primary Channel": {
+      "main": [
+        [
+          {
+            "node": "Post a Note to Teams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Client Teams Tags": {
+      "main": [
+        [
+          {
+            "node": "Get Client Team Members",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Client Team Members": {
+      "main": [
+        [
+          {
+            "node": "Split Client Teams Members",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Email": {
+      "main": [
+        [
+          {
+            "node": "Add Email Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Client Teams Members": {
+      "main": [
+        [
+          {
+            "node": "Get User Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Email Address": {
+      "main": [
+        [
+          {
+            "node": "Filter Teams to Post Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Teams to Post Note": {
+      "main": [
+        [
+          {
+            "node": "Get Teams Primary Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -854,8 +1220,9 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "62a99c54-d812-4641-bcab-192626c151c7",
+  "versionId": "58f698c4-92b9-4f0e-9074-357fa83c53f4",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
   },
   "id": "t63tNbhbAo60NchKEQQAm",

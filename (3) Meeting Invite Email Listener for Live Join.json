@@ -16,6 +16,12 @@
               "name": "secret_key",
               "value": "super-secret-key",
               "type": "string"
+            },
+            {
+              "id": "64d02dfa-788f-4358-83ec-fd8fded83444",
+              "name": "katie_email",
+              "value": "KatieZ@masterstouchweb.com",
+              "type": "string"
             }
           ]
         },
@@ -24,10 +30,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        192,
-        0
+        832,
+        544
       ],
-      "id": "bba50190-2610-4b12-a177-d0cf2a9e555c",
+      "id": "e22ae8f1-f11b-41b8-86e3-256030b9ad91",
       "name": "Workflow Configuration"
     },
     {
@@ -40,10 +46,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        400,
-        0
+        1040,
+        544
       ],
-      "id": "54e5ca26-2f97-49b0-9dc0-36a019d4f86d",
+      "id": "c5b9582f-653d-4c29-ae92-fb9b7a0df183",
       "name": "Get Invite Email",
       "credentials": {
         "oAuth2Api": {
@@ -79,10 +85,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        608,
-        0
+        1248,
+        544
       ],
-      "id": "db06fb54-e24d-4cec-9520-bff2b58bdf41",
+      "id": "c60765e5-2231-46a4-a486-3af87366d74d",
       "name": "Not Read?"
     },
     {
@@ -100,12 +106,12 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        1040,
-        0
+        1680,
+        544
       ],
-      "id": "4d3b7707-d126-45cd-a40c-ccda144c404a",
+      "id": "5f1f04b5-e082-428c-ba3e-f45503446d82",
       "name": "Update Email as Read",
-      "webhookId": "edb881ed-5946-445e-9b38-61c81443ff32",
+      "webhookId": "8f5edf13-e112-4cbf-af94-6ad4e258cd8d",
       "credentials": {
         "microsoftOutlookOAuth2Api": {
           "id": "iqL1Tt6G6EOwOLPm",
@@ -120,10 +126,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
-        0
+        1456,
+        544
       ],
-      "id": "f144a350-c8d4-4db0-a427-5f72ac623889",
+      "id": "8e302bc8-ef26-44e6-a1bf-77f5e0aade03",
       "name": "Get Email Detail"
     },
     {
@@ -136,10 +142,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        32,
-        272
+        1920,
+        544
       ],
-      "id": "df56b93c-9899-48c0-bc7d-2bc251d1d7ba",
+      "id": "74422031-5bb1-4fa3-ad19-418538a7e363",
       "name": "Get User ID",
       "credentials": {
         "oAuth2Api": {
@@ -158,10 +164,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        240,
-        272
+        2144,
+        544
       ],
-      "id": "04e1fe0c-70b8-412b-a108-abae0c561f95",
+      "id": "a47377e6-4857-4669-86ed-0c9509fe40f4",
       "name": "Get Metadata of Meeting",
       "credentials": {
         "oAuth2Api": {
@@ -172,21 +178,21 @@
     },
     {
       "parameters": {
-        "jsCode": "const meeting = $input.first().json.value[0];\nconst attendees = meeting.participants.attendees.map(item => (item.upn));\nattendees.push(meeting.participants.organizer.upn);\n\nif (meeting.joinWebUrl) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      startTime: meeting.startDateTime,\n      endTime: meeting.endDateTime,\n      joinUrl: meeting.joinUrl,\n      subject: meeting.subject,\n      organizer: meeting.participants.organizer.upn,\n      attendees: JSON.stringify(attendees)\n    },\n  };\n}\n"
+        "jsCode": "const meeting = $input.first().json.value[0];\nconst katie_email = $(\"Workflow Configuration\").first().json.katie_email;\n\nlet attendees = meeting.participants.attendees.map(item => (item.identity && item.identity.user.id));\n\n// attendees.push(meeting.participants.organizer.upn);\n\nif (attendees.includes(katie_email)) {\n  attendees = attendees.filter(item => item !== katie_email);\n}\n\nif (meeting.joinWebUrl) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      startTime: meeting.startDateTime,\n      endTime: meeting.endDateTime,\n      joinUrl: meeting.joinUrl,\n      subject: meeting.subject,\n      organizerId: meeting.participants.organizer.identity.user.id,\n      attendeesIds: attendees\n    },\n  };\n}\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        272
+        624,
+        960
       ],
-      "id": "5a3a6f4c-3d37-4007-9396-2be960614d18",
+      "id": "5e286c77-efd9-406a-b6f0-6c20192363ea",
       "name": "Extract Meeting Details"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $('Workflow Configuration').item.json.botBackendUrl + '/joinMeeting' }}",
+        "url": "={{ $('Workflow Configuration').first().json.botBackendUrl + '/joinMeeting' }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -201,23 +207,23 @@
           "parameters": [
             {
               "name": "meetingId",
-              "value": "={{ $('Extract Meeting Details').item.json.meetingId }}"
+              "value": "={{ $('Meeting Data').item.json.meetingId }}"
             },
             {
               "name": "joinUrl",
-              "value": "={{ $('Extract Meeting Details').item.json.joinUrl }}"
+              "value": "={{ $('Meeting Data').item.json.joinUrl }}"
             },
             {
               "name": "startTime",
-              "value": "={{ $('Extract Meeting Details').item.json.startTime }}"
+              "value": "={{ $('Meeting Data').item.json.startTime }}"
             },
             {
               "name": "endTime",
-              "value": "={{ $('Extract Meeting Details').item.json.endTime }}"
+              "value": "={{ $('Meeting Data').item.json.endTime }}"
             },
             {
               "name": "subject",
-              "value": "={{ $('Extract Meeting Details').item.json.subject }}"
+              "value": "={{ $('Meeting Data').item.json.subject }}"
             }
           ]
         },
@@ -226,10 +232,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        672,
-        272
+        1952,
+        960
       ],
-      "id": "497f40ec-6bc0-4020-82e6-191cebe2fcf4",
+      "id": "445397a9-a11c-4311-8287-a686e51b5146",
       "name": "Join Meeting Online(Teams)",
       "retryOnFail": true,
       "maxTries": 5
@@ -247,16 +253,16 @@
           "mappingMode": "defineBelow",
           "value": {
             "isEmailRead": true,
-            "meetingId": "={{ $('Extract Meeting Details').item.json.meetingId }}",
-            "subject": "={{ $('Extract Meeting Details').item.json.subject }}",
-            "startTime": "={{ $('Extract Meeting Details').item.json.startTime }}",
-            "endTime": "={{ $('Extract Meeting Details').item.json.endTime }}",
-            "joinUrl": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
-            "attendees": "={{ $('Extract Meeting Details').item.json.attendees }}",
-            "email_id": "={{ $('Get Email Detail').item.json.email_id }}",
+            "meetingId": "={{ $('Meeting Data').item.json.meetingId }}",
+            "subject": "={{ $('Meeting Data').item.json.subject }}",
+            "startTime": "={{ $('Meeting Data').item.json.startTime }}",
+            "endTime": "={{ $('Meeting Data').item.json.endTime }}",
+            "joinUrl": "={{ $('Meeting Data').item.json.joinUrl }}",
+            "attendees": "={{ $('Meeting Data').item.json.attendees }}",
+            "email_id": "={{ $('Get Email Detail').first().json.email_id }}",
             "processed": 0,
             "recallBotId": "={{ $json.recallBotId }}",
-            "organizer": "={{ $('Extract Meeting Details').item.json.organizer }}"
+            "organizer": "={{ $('Meeting Data').item.json.organizer }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -399,11 +405,131 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        880,
-        272
+        2160,
+        960
       ],
-      "id": "43b504b3-9b7e-40bf-9a4c-212247f7d57f",
+      "id": "2813262d-d3f4-408b-a0b8-25609f18bbe1",
       "name": "Save Meeting"
+    },
+    {
+      "parameters": {
+        "content": "## Meeting Invite Email Listener for Live Join\n### This workflow automatically listens for new Microsoft Teams meeting invitations received via email, extracts meeting details, updates the email status, and orchestrates the joining and saving of meeting data via a bot.",
+        "height": 704,
+        "width": 2272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        528,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "a40f1402-9814-418b-9d68-0ebebd831a5d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users/{{ $('Extract Meeting Details').first().json.organizerId }}?$select=mail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1520,
+        960
+      ],
+      "id": "87e2f2cf-fcec-455e-ace5-dbf54560e6d8",
+      "name": "Get Organizer's Email Address",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "232a5482-6f6c-4f67-89ce-ce0088940d70",
+              "leftValue": "={{ $json.attendeesIds }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        832,
+        960
+      ],
+      "id": "a8ae7f83-3a7c-4e85-a213-643b773c45cf",
+      "name": "Attendees is Not Empty?"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "attendeesIds",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        800
+      ],
+      "id": "162f67f5-df42-4f99-99ec-3ed0edd4be60",
+      "name": "Split Out Attendees IDs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const meeting = $('Extract Meeting Details').first();\nconst organizer = $input.first().json.mail;\nlet attendees = [];\n\nif (meeting.json.attendeesIds.length !== 0) {\n  attendees = $('Get Attendees Email Address').all().map(item => item.json.mail);\n}\n\nreturn [\n  {\n    json: {\n      ...meeting.json,\n      organizer,\n      attendees: JSON.stringify(attendees)\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        960
+      ],
+      "id": "e79055d7-98db-436a-a808-94ae9df2ecf7",
+      "name": "Meeting Data"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users/{{ $json.attendeesIds }}?$select=mail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1280,
+        800
+      ],
+      "id": "acc347dd-95ec-460c-8894-b1ab6c6ae82c",
+      "name": "Get Attendees Email Address",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
     },
     {
       "parameters": {
@@ -415,39 +541,27 @@
           ]
         },
         "filters": {
-          "custom": "contains(subject, 'Join Teams meeting')"
+          "custom": "contains(subject, 'Join Teams meeting')",
+          "foldersToInclude": [
+            "AAMkADA3YTJiMzNhLWYzMTYtNDM4YS04NTMxLTE3YzAzNDIzMjkzZQAuAAAAAAA2xcWbuqD8TJ_2ZWxqajfyAQAfgpJqZGTZQ4_gBmxc-X8sAABCRdsYAAA="
+          ]
         },
         "options": {}
       },
       "type": "n8n-nodes-base.microsoftOutlookTrigger",
       "typeVersion": 1,
       "position": [
-        -16,
-        0
+        624,
+        544
       ],
-      "id": "7abbf76c-63ce-40f4-a94e-294e35b2982a",
-      "name": "Microsoft Outlook Trigger",
+      "id": "e27da5ee-ce95-4a19-86aa-f1d9ea052d36",
+      "name": "Microsoft Outlook Trigger - Ongoing Invites Folder",
       "credentials": {
         "microsoftOutlookOAuth2Api": {
           "id": "iqL1Tt6G6EOwOLPm",
           "name": "Microsoft Outlook account"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "## Meeting Invite Email Listener for Live Join\n### This workflow automatically listens for new Microsoft Teams meeting invitations received via email, extracts meeting details, updates the email status, and orchestrates the joining and saving of meeting data via a bot.",
-        "height": 656,
-        "width": 1728
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -272,
-        -192
-      ],
-      "typeVersion": 1,
-      "id": "73dbd9b8-99c5-42e4-982d-5192c9431e95",
-      "name": "Sticky Note"
     }
   ],
   "pinData": {},
@@ -485,22 +599,22 @@
         ]
       ]
     },
-    "Get Email Detail": {
+    "Update Email as Read": {
       "main": [
         [
           {
-            "node": "Update Email as Read",
+            "node": "Get User ID",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Update Email as Read": {
+    "Get Email Detail": {
       "main": [
         [
           {
-            "node": "Get User ID",
+            "node": "Update Email as Read",
             "type": "main",
             "index": 0
           }
@@ -533,7 +647,7 @@
       "main": [
         [
           {
-            "node": "Join Meeting Online(Teams)",
+            "node": "Attendees is Not Empty?",
             "type": "main",
             "index": 0
           }
@@ -551,7 +665,69 @@
         ]
       ]
     },
-    "Microsoft Outlook Trigger": {
+    "Get Organizer's Email Address": {
+      "main": [
+        [
+          {
+            "node": "Meeting Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendees is Not Empty?": {
+      "main": [
+        [
+          {
+            "node": "Split Out Attendees IDs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Organizer's Email Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Attendees IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Attendees Email Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meeting Data": {
+      "main": [
+        [
+          {
+            "node": "Join Meeting Online(Teams)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Attendees Email Address": {
+      "main": [
+        [
+          {
+            "node": "Get Organizer's Email Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft Outlook Trigger - Ongoing Invites Folder": {
       "main": [
         [
           {
@@ -568,7 +744,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "9e40812d-c835-4b35-a036-06a7889121aa",
+  "versionId": "ae71e160-1cde-408f-877a-df8666e9af38",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"

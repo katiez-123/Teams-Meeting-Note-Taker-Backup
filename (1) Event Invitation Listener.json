@@ -195,7 +195,7 @@
           "value": "tqFVNLoqGQTQOFO3",
           "mode": "list",
           "cachedResultUrl": "/workflow/tqFVNLoqGQTQOFO3",
-          "cachedResultName": "(1) Auto Accept Invitation & Join Meeting"
+          "cachedResultName": "(2) Auto Accept Invitation & Join Meeting"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -262,6 +262,19 @@
       "typeVersion": 1,
       "id": "be40a583-3215-4037-b8ec-4d1ba77d724c",
       "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nreturn {\n  json: {\n    ...item.json,\n    email_id: $(\"Get Invite Email\").first().json.id,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        240
+      ],
+      "id": "4fb390f0-b86f-453f-bbd0-19f84400f0f6",
+      "name": "Add Email ID"
     }
   ],
   "pinData": {},
@@ -359,6 +372,17 @@
       "main": [
         [
           {
+            "node": "Add Email ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Email ID": {
+      "main": [
+        [
+          {
             "node": "Call 'Auto Accept Invitation & Join Meeting'1",
             "type": "main",
             "index": 0
@@ -372,7 +396,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "48d80060-fc70-4f7e-ab6a-71003fb65b08",
+  "versionId": "61590575-1321-494f-bed1-7b11baaf7324",
   "meta": {
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
   },

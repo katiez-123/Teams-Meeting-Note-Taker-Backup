@@ -147,7 +147,8 @@
             "endTime": "={{ $('Extract Meeting Details').item.json.endTime }}",
             "joinUrl": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
             "attendees": "={{ $('Extract Meeting Details').item.json.attendeesStr }}",
-            "recallBotId": "={{ $json.recallBotId }}"
+            "recallBotId": "={{ $json.recallBotId }}",
+            "email_id": "={{ $('Extract Meeting Details').item.json.email_id }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -239,7 +240,7 @@
               "display": true,
               "type": "string",
               "readOnly": false,
-              "removed": true
+              "removed": false
             },
             {
               "id": "processed",
@@ -342,7 +343,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const meeting = $input.first().json;\n\nif (meeting) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      subject: meeting.subject,\n      startTime: meeting.start.dateTime,\n      endTime: meeting.end.dateTime,\n      organizer: meeting.organizer.emailAddress.address,\n      joinUrl: meeting.onlineMeeting.joinUrl,\n      attendees: meeting.attendees,\n      attendeesStr: JSON.stringify(meeting.attendees.map(item => item.emailAddress.address))\n    }\n  }\n}\n\n"
+        "jsCode": "const meeting = $input.first().json;\nconst katie_email = 'KatieZ@masterstouchweb.com';\n\nlet attendees = meeting.attendees.map((item) => item.emailAddress.address);\n\nif (attendees.includes(katie_email)) {\n  attendees = attendees.filter((item) => item !== katie_email);\n}\n\nif (meeting) {\n  return {\n    json: {\n      meetingId: meeting.id,\n      subject: meeting.subject,\n      startTime: meeting.start.dateTime,\n      endTime: meeting.end.dateTime,\n      organizer: meeting.organizer.emailAddress.address,\n      joinUrl: meeting.onlineMeeting.joinUrl,\n      attendees,\n      attendeesStr: JSON.stringify(attendees),\n      email_id: meeting.email_id\n    },\n  };\n}\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -465,7 +466,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "e6d7b110-3b0f-4b16-864f-003e41494fa3",
+  "versionId": "436e9e99-9175-46d9-8acd-b63fe3cc359f",
   "meta": {
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
   },

@@ -1,0 +1,182 @@
+{
+  "name": "(5) Forward Note Reply to Organizer",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "foldersToInclude": [
+            "AAMkADA3YTJiMzNhLWYzMTYtNDM4YS04NTMxLTE3YzAzNDIzMjkzZQAuAAAAAAA2xcWbuqD8TJ_2ZWxqajfyAQAfgpJqZGTZQ4_gBmxc-X8sAABCRdsaAAA="
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        0
+      ],
+      "id": "1aad2460-98e6-423f-897a-ebade6373398",
+      "name": "Microsoft Outlook Trigger - (Teams) Notes Replies",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.bodyPreview || '';\n\nconst regex = /wrote:\\s*\\r?\\nOrganizer:\\s*([^\\s\\r\\n]+)/i;\nconst match = text.match(regex);\n\nreturn [\n  {\n    organizerEmail: match ? match[1] : null\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "86b48945-d854-4df9-a6e6-752d524b58ae",
+      "name": "Get Organizer"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/messages/{{$('Microsoft Outlook Trigger - (Teams) Notes Replies').first().json.id}}/forward",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"toRecipients\": [\n    {\n      \"emailAddress\": {\n        \"address\": \"{{ $('Get Organizer').first().json.organizerEmail }}\"\n      }\n    }\n  ],\n  \"comment\": \"{{ $json.value[0].displayName }} has questions about the meeting notes\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d71d6390-1b07-42d8-9258-42cae1778b3d",
+      "name": "Forward to Organizer",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $('Microsoft Outlook Trigger - (Teams) Notes Replies').first().json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "b13793d8-7a89-4ae3-a0e8-3fb10d1e0298",
+      "name": "Delete Reply Email",
+      "webhookId": "6a8b4091-334f-47a8-9846-b258cd1d5e88",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/users?$filter=mail eq '{{ $json.organizerEmail }}'",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        192,
+        0
+      ],
+      "id": "2d08ce06-d7b3-4176-9ae3-26357e561268",
+      "name": "Get User",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "nWbw4c10mqgIAAJ8",
+          "name": "Microsoft Graph - Client Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Microsoft Outlook Trigger - (Teams) Notes Replies": {
+      "main": [
+        [
+          {
+            "node": "Get Organizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Organizer": {
+      "main": [
+        [
+          {
+            "node": "Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward to Organizer": {
+      "main": [
+        [
+          {
+            "node": "Delete Reply Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User": {
+      "main": [
+        [
+          {
+            "node": "Forward to Organizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "d5841852-2deb-4aae-9eea-30fe09c91859",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "KFSqn4dX6RvqRELXe0ju0",
+  "tags": []
+}

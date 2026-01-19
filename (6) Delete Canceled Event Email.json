@@ -1,0 +1,131 @@
+{
+  "name": "(6) Delete Canceled Event Email",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "foldersToInclude": [
+            "AAMkADA3YTJiMzNhLWYzMTYtNDM4YS04NTMxLTE3YzAzNDIzMjkzZQAuAAAAAAA2xcWbuqD8TJ_2ZWxqajfyAQAfgpJqZGTZQ4_gBmxc-X8sAAA_ph3HAAA="
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "817cceb0-32a9-4f79-be39-3df4558a43a4",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "f0de95e1-a13e-4ec1-bd10-bdb8f4f91861",
+      "name": "Delete a message",
+      "webhookId": "cbf12ca6-c2f3-4dc9-a8ce-936f169bfa26",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "iqL1Tt6G6EOwOLPm",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4bf9653a-d984-4d5f-919b-5ab1932581cb",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Canceled: ",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "570633d5-d861-4f0c-8609-d28288c9bb08",
+      "name": "Is Cancellation Email?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Cancellation Email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Cancellation Email?": {
+      "main": [
+        [
+          {
+            "node": "Delete a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a8a0d9f8-0742-4bf1-a188-88e922d2df8f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
+  },
+  "id": "LhBBK2TlEtlW7dbJ7TcVj",
+  "tags": []
+}
