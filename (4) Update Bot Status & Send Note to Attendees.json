@@ -307,6 +307,12 @@
               "name": "katie_email",
               "value": "KatieZ@masterstouchweb.com",
               "type": "string"
+            },
+            {
+              "id": "941bc91f-bba5-49af-a280-b36f329f17a2",
+              "name": "signature",
+              "value": "<h4 style=\"color: #44546a; font-size: 12pt;\">Katie Zettabyte, A.I.</h4>\n<p style=\"color: #a6a6a6; font-size: 10pt; margin: 0;\">Assistant to the VP, Resident Genius</p>\n<p style=\"color: #a6a6a6; font-size: 10pt; margin: 0;\">Masters Touch Design Build</p>\n<p style=\"color: #a6a6a6; font-size: 10pt; margin: 0;\">77 Main St, Medway 02053</p>\n<p style=\"color: #a6a6a6; font-size: 10pt; margin: 0;\">P. 508-359-5900 x 219</p>\n<br>\n<p>We Build Trust</p>\n<br>\n<a href=\"https://www.webmasterstouch.com\"  style=\"color: #44546a; font-size: 9pt;\"><b>[www.masterstouchweb.com]www.masterstouchweb.com</b></a> | <a href=\"https://facebook.com/masterstouchweb\"  style=\"color: #44546a; font-size: 9pt;\"><b>MTDB on Facebook</b></a> | <a href=\"https://masterstouchweb.com/blog\"  style=\"color: #44546a; font-size: 9pt;\"><b>Blog</b></a> | <a href=\"https://www.houzz.com/pro/masterstouchweb/__public\" style=\"color: #44546a; font-size: 9pt;\"></a> | <a href=\"https://www.google.com/search?source=hp&ei=qv5dWo6ONofGjwSYn6mIAQ&q=masters+touch+design+build+on+youtube&oq=masters&gs_l=psy-ab.1.1.35i39k1l2j0i20i264k1l2j0j0i131k1l3j0l2.1377.2019.0.3864.9.7.0.0.0.0.236.832.0j4j1.6.0....0...1c.1.64.psy-ab..3.6.939.6..0i131i20i264k1.112.o1kgoVVFoYk\"  style=\"color: #44546a; font-size: 9pt;\"><b>MTDB on YouTube</b></a>\n",
+              "type": "string"
             }
           ]
         },
@@ -459,10 +465,12 @@
     },
     {
       "parameters": {
-        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().filter(email => email !== $('Workflow Configuration').first().json.katie_email).join(',') }}",
+        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().filter(email => email !== $('Workflow Configuration').first().json.katie_email).concat($('Compute WordLimit + EffectiveLeave').item.json.organizer).join(',') }}",
         "subject": "={{ $json.subject }}",
-        "bodyContent": "={{ $json.body }}",
-        "additionalFields": {}
+        "bodyContent": "={{ $json.body.replace(/\\n/g, \"<br>\") + $('Workflow Configuration').first().json.signature }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
       },
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
@@ -1220,7 +1228,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "58f698c4-92b9-4f0e-9074-357fa83c53f4",
+  "versionId": "24838623-6383-4444-97c0-966616688110",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
