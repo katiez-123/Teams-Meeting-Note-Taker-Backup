@@ -135,8 +135,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        720,
-        -96
+        1728,
+        -448
       ],
       "id": "db37f3d5-fab6-476d-8135-c14d2cbe5e6a",
       "name": "Update Join Timestamp"
@@ -280,8 +280,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        720,
-        96
+        1728,
+        -256
       ],
       "id": "a259ff01-0f67-4633-8696-58c3a4624eab",
       "name": "Update Left Timestamp"
@@ -321,8 +321,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1184,
-        96
+        624,
+        64
       ],
       "id": "b7fac66e-c544-4656-bcc7-237804e0fc1f",
       "name": "Workflow Configuration"
@@ -359,21 +359,21 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1408,
-        96
+        848,
+        64
       ],
       "id": "56d49198-77a2-418a-964f-9f63f4fbc934",
       "name": "Get Candidate Meeting Ready for Notes"
     },
     {
       "parameters": {
-        "jsCode": "// Input item\nconst item = $input.first().json;\n\n// ---- CONFIG ----\nconst WORDS_PER_HOUR = 600;\nconst MIN_WORD_LIMIT = 150;\n\n// ---- DURATION ----\n// Expecting duration in minutes (adjust if needed)\nconst durationMinutes = Number(item.durationMinutes || 0);\n\n// Convert to hours\nconst durationHours = durationMinutes / 60;\n\n// Calculate word limit\nlet wordLimit = Math.round(durationHours * WORDS_PER_HOUR);\n\n// Safeguards\nif (!wordLimit || wordLimit < MIN_WORD_LIMIT) {\n  wordLimit = MIN_WORD_LIMIT;\n}\n\n// ---- EFFECTIVE LEAVE ----\n// You can expand this logic as needed\nconst effectiveLeave =\n  item.onLeave === true ||\n  item.cancelled === true ||\n  item.status === \"cancelled\";\n\n// ---- OUTPUT ----\nreturn [\n  {\n    json: {\n      ...item,\n      durationHours,\n      wordLimit,\n      effectiveLeave,\n    },\n  },\n];\n"
+        "jsCode": "// Input item\nconst item = $input.first().json;\nconst startTime = new Date(item.join_timestamp).getTime()\nconst leftTime = new Date(item.left_timestamp).getTime()\n\n// ---- CONFIG ----\nconst WORDS_PER_HOUR = 600;\nconst MIN_WORD_LIMIT = 150;\n\n// ---- DURATION ----\n// Expecting duration in minutes (adjust if needed)\nconst durationMinutes = Number((leftTime - startTime) / (1000 * 60) || 0);\n\n// Convert to hours\nconst durationHours = durationMinutes / 60;\n\n// Calculate word limit\nlet wordLimit = Math.round(durationHours * WORDS_PER_HOUR);\n\n// Safeguards\nif (!wordLimit || wordLimit < MIN_WORD_LIMIT) {\n  wordLimit = MIN_WORD_LIMIT;\n}\n\n// ---- EFFECTIVE LEAVE ----\n// You can expand this logic as needed\nconst effectiveLeave =\n  item.onLeave === true ||\n  item.cancelled === true ||\n  item.status === \"cancelled\";\n\n// ---- OUTPUT ----\nreturn [\n  {\n    json: {\n      ...item,\n      durationMinutes,\n      durationHours,\n      wordLimit,\n      effectiveLeave,\n    },\n  },\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1600,
-        96
+        1040,
+        64
       ],
       "id": "aca28a93-b39f-4939-a3aa-0f8f67576255",
       "name": "Compute WordLimit + EffectiveLeave"
@@ -396,7 +396,7 @@
           "parameters": [
             {
               "name": "meetingId",
-              "value": "={{ $json.meetingId }}"
+              "value": "={{ $('Compute WordLimit + EffectiveLeave').first().json.meetingId }}"
             }
           ]
         },
@@ -405,8 +405,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1808,
-        96
+        1664,
+        64
       ],
       "id": "082d5461-fc3a-4981-921a-fb077988ff8f",
       "name": "Get Transcript",
@@ -416,58 +416,39 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ { meetingId: $json.meetingId, transcriptText: $json.transcriptText, quality: $json.quality, organizer: $('Compute WordLimit + EffectiveLeave').item.json.organizer } }}",
+        "text": "={{ { meetingId: $json.meetingId, transcriptText: $json.transcriptText, quality: $json.quality, organizer: $('Compute WordLimit + EffectiveLeave').first().json.organizer, teamNames: $json.teamNames } }}",
         "options": {
-          "systemMessage": "=Generate professional meeting notes in the following format and structure.\n\nYou are a female assistant.\nKeep the tone friendly and conversational, yet professional.\n\nIf the transcript quality is poor or unclear, add one single sentence at the very top of the body noting this, followed by a blank line, then continue with the summary using best judgment.\n\nCONTENT REQUIREMENTS\n\nThe body MUST be formatted using explicit newline characters (\\n).\n\nOverview:\nWrite 2–3 concise sentences.\nEnd the section with two newlines.\n\nKey Decisions:\n- Each decision on its own line starting with a dash.\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nAction Items:\n- [Task] - Assigned to: [Person] - Due: [Date if mentioned]\nOmit this section entirely if none.\nEnd the section with two newlines.\n\nDiscussion Points:\n- Each discussion topic on its own line starting with a dash.\n\nSTYLE GUIDELINES\n- Keep notes concise but informative.\n- Focus on outcomes and action items.\n- Include organizer email.\n- Friendly, conversational, professional tone.\n- No negative or critical content.\n- Do not invent facts or opinions.\n\nHIGHLIGHTS\n- Clearly surface customer pain points, commitments, pricing discussions, and next steps when present.\n\nLENGTH CONSTRAINT\n- Limit output to {{ $('Compute WordLimit + EffectiveLeave').first().json.wordLimit }} words.\n\nOUTPUT FORMAT\nReturn ONLY valid JSON.\n\nExample structure (use real content, not placeholders):\n\n{\n  \"subject\": \"Teams Meeting Notes\",\n  \"body\": \"Organizer: John@masterstouchweb.com\\n\\nTranscript quality was unclear, so this summary is based on best judgment.\\n\\nOverview:\\nSentence one. Sentence two.\\n\\nKey Decisions:\\n- Decision one\\n- Decision two\\n\\nAction Items:\\n- Task description - Assigned to: Name - Due: Date\\n\\nDiscussion Points:\\n- Topic one with brief context\\n- Topic two with brief context\"\n}\n"
+          "systemMessage": "=Meeting Notes Html Prompt\n\nYou are a professional meeting notes assistant. Generate structured meeting notes in HTML format from the provided transcript.\n\nCRITICAL: NO HALLUCINATIONS\n- Only include information explicitly stated in the transcript — do not infer, assume, or fabricate\n- If you're unsure whether something was said, omit it entirely\n- Do not invent names, tasks, decisions, dates, or numbers\n- Do not combine or merge details from different parts of the conversation unless they clearly refer to the same thing\n- If a task or decision is vague in the transcript, keep it vague in the notes — do not add specificity that wasn't there\n- When in doubt, leave it out\n\nTEAM NAME MATCHING & SPELLING\n\nClient/project names in the transcript may be misspelled or appear in different formats. Use the provided team list to correct spellings.\n\nMatching Rule:\n- The FIRST word of each team name is the client's LAST NAME — use this as the primary matching key\n- Match phonetically similar names in the transcript to the correct spelling from the team list\n\nExamples:\n- Team list shows: \"Harris, Donna and Marq\"\n- Transcript says: \"the Harriss project\" or \"Harris team\" or \"working on Harris\" → Correct to \"Harris\"\n- Transcript says: \"Turgion\" but team list shows \"Turgeon, Mike\" → Correct to \"Turgeon\"\n\nGuidelines:\n- Always use the spelling from the team list, not the transcript\n- Match variations like \"[Name] project\", \"[Name] team\", \"[Name] job\", or just \"[Name]\" to the same client\n- If a name in the transcript cannot be confidently matched to any team name, keep the transcript spelling and add \"(spelling unverified)\"\n- Do NOT invent client names that don't appear in either the transcript or team list\n\n\nCRITICAL: ACTION ITEM ATTRIBUTION RULES\n\nWhen identifying action items, pay careful attention to WHO is being asked to do something versus WHO is doing the asking:\n- If Person A says \"Hey Matt, can you send those specs?\" → Assigned to Matt (NOT Person A)\n- If Person A says \"I'll handle that\" or \"I can take care of it\" → Assigned to Person A\n- If Person A says \"We need someone to...\" without a clear assignee → Mark as Unassigned\n- Look for phrases like \"you need to\", \"can you\", \"will you\", \"[Name], please...\" to identify the RECIPIENT of the task\n- Look for phrases like \"I will\", \"I'll\", \"I can\", \"let me\" to identify SELF-ASSIGNED tasks\n- When in doubt about attribution, mark as \"[Unclear - verify]\"\n\nGROUPING & ORGANIZATION RULES\n- Action Items → Group by person\n- Each person gets their own section so they can quickly scan their tasks\n- List all tasks for that person as sub-bullets\n\nExample:\nDoug Masters\n  - Send pictures of shower niche issue (Dubois example)\n  - Follow up with supplier on tile delivery\n\nAlex Yavarow\n  - Confirm custom vs standard niches with tile quotes\n\nJacob Gadbois\n  - Discuss niche dimensions with Trevor for future specs\n\nAll Other Sections → Group by project, then by subject\n\n- Key Decisions, Discussion Points, and Parking Lot should be organized by project first\n- Within each project, group related subjects together\n- Example:\n  - Turgeon Project\n    - Framing: Beam specs confirmed, waiting on updated drawings\n    - Permitting: Application submitted, 2-week expected turnaround\n  - Grant Project\n    - Pricing: Discussed material cost increases, client approved revised quote\n\nTRANSCRIPT ANALYSIS APPROACH\n1. Identify all speakers and their roles if apparent\n2. Track the flow of conversation to understand context\n3. For each potential action item, trace back to find: (a) what task was discussed, (b) who was asked/volunteered to do it\n4. Capture commitments, not just suggestions\n5. Consolidate duplicates — if the same task is mentioned multiple times, merge into one item\n6. Verify before including — re-read the relevant transcript section to confirm accuracy before adding any item\n\nCONTENT REQUIREMENTS\n- Use HTML tags (, , , , , ) to make the output visually clear\n- Every must be inside a\n- No unclosed tags\n- Replace literal line breaks with \\n in the JSON string when sending to n8n\n- Escape all double quotes inside HTML with \" to produce valid JSON\n\nOverview (3-5 sentences for meetings over 30 minutes) Summarize the meeting purpose, key participants, and main outcomes.\n\nKey Decisions (omit section if none)\n- Grouped by project, then subject\n- Include who made or agreed to the decision\n\nAction Items (omit section if none)\n- Grouped by person responsible\n- Be thorough — a one-hour meeting typically has 5-15 action items\n- Include follow-ups, commitments to send information, scheduled callbacks, etc.\n\nDiscussion Points\n- Grouped by project, then subject\n- For hour-long meetings, expect 6-12 meaningful discussion points\n- Include project updates, status reports, blockers, and concerns raised\n\nParking Lot (omit section if none)\n- Grouped by project, then subject\n- Items raised but not resolved\n- Questions that need answers from others\n\nSTYLE GUIDELINES\n- Tone: Friendly and professional\n- Be thorough but concise — don't pad, but don't under-report\n- Focus on actionable outcomes\n- Include specific names, numbers, dates, and project names mentioned\n- Surface customer pain points, commitments, pricing discussions, and next steps\n- Must include \"Team Meeting Notes:\"\n\nLENGTH GUIDANCE\n\nMeeting Duration\tTarget Length\nUnder 15 min\t200-300 words\n15-30 min\t300-500 words\n30-60 min\t500-800 words\nOver 60 min\t800-1200 words\n\nDuration minutes of this meeting: {{ $('Compute WordLimit + EffectiveLeave').first().json.durationMinutes }}\n\nIf transcript quality is poor, note this briefly at the top, then proceed with best judgment.\n\nOUTPUT FORMAT\n\nReturn ONLY valid JSON (ensure all HTML is escaped and line breaks are \\n for n8n): { \"subject\": \"Teams Meeting Notes: [Brief topic or date]\", \"body\": \"Organizer: {{ $('Compute WordLimit + EffectiveLeave').first().json.organizer }}\\n\\nOverview[HTML content]\\n\\nKey Decisions[HTML content]\\n\\nAction Items[HTML content]\\n\\nDiscussion Points[HTML content]\\n\\nParking Lot[HTML content]\" }\n\nIf output approaches length limits, STOP and return the string \"__TRUNCATED__\" instead of cutting off.\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        2032,
-        -16
+        2064,
+        64
       ],
       "id": "18231caa-f6f6-4156-85cf-55b26efa10a0",
-      "name": "AI Agent"
+      "name": "AI Agent",
+      "retryOnFail": true
     },
     {
       "parameters": {
-        "model": "grok-4-0709",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
-      "typeVersion": 1,
-      "position": [
-        2032,
-        160
-      ],
-      "id": "660da521-8ebb-4151-bcf1-35ff91fea63f",
-      "name": "xAI Grok Chat Model",
-      "credentials": {
-        "xAiApi": {
-          "id": "uWCMDM7urVwkWQvW",
-          "name": "xAi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Get raw output string\nconst raw = $json.output;\n\n// Remove markdown code block markers\nconst cleaned = raw\n  .replace(/```json/g, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Parse JSON\nconst parsed = JSON.parse(cleaned);\n\n// Ensure line breaks are real (handles double-escaped cases)\nif (typeof parsed.body === 'string') {\n  parsed.body = parsed.body.replace(/\\\\n/g, '\\n');\n}\n\n// Return formatted structure exactly as AI produced it\nreturn [\n  {\n    json: {\n      subject: parsed.subject,\n      body: parsed.body\n    }\n  }\n];\n"
+        "jsCode": "// 1) Get raw output (string)\nconst raw = $input.first().json.output;\n\nif (typeof raw !== 'string') {\n  throw new Error(`Expected \"output\" to be a string, got: ${typeof raw}`);\n}\n\n// 2) Remove code fences (```json ... ```)\nlet cleaned = raw\n  .replace(/```json\\s*/gi, '')\n  .replace(/```\\s*/g, '')\n  .trim();\n\n// 3) Extract the first valid-looking JSON object block: from first { to last }\nconst start = cleaned.indexOf('{');\nconst end = cleaned.lastIndexOf('}');\n\nif (start === -1 || end === -1 || end <= start) {\n  throw new Error(\n    `Could not find a JSON object in the output. First 300 chars:\\n${cleaned.slice(0, 300)}`\n  );\n}\n\nconst jsonText = cleaned.slice(start, end + 1);\n\n// 4) Parse JSON safely\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonText);\n} catch (e) {\n  // Helpful debug\n  throw new Error(\n    `JSON.parse failed: ${e.message}\\n\\nExtracted JSON (first 500 chars):\\n${jsonText.slice(0, 500)}\\n\\nExtracted JSON (last 500 chars):\\n${jsonText.slice(-500)}`\n  );\n}\n\n// 5) Validate expected keys\nif (!parsed.subject || !parsed.body) {\n  throw new Error(\n    `Parsed JSON missing subject/body. Keys: ${Object.keys(parsed).join(', ')}`\n  );\n}\n\n// 6) Return as proper n8n items\nreturn [\n  {\n    json: {\n      subject: parsed.subject,\n      body: parsed.body\n    }\n  }\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2368,
-        96
+        2400,
+        80
       ],
       "id": "fe130064-9a6f-4d5a-b368-35e6edf11115",
       "name": "Parse Output"
     },
     {
       "parameters": {
-        "toRecipients": "={{ $('Compute WordLimit + EffectiveLeave').item.json.attendees.parseJson().filter(email => email !== $('Workflow Configuration').first().json.katie_email).concat($('Compute WordLimit + EffectiveLeave').item.json.organizer).join(',') }}",
-        "subject": "={{ $json.subject }}",
-        "bodyContent": "={{ $json.body.replace(/\\n/g, \"<br>\") + $('Workflow Configuration').first().json.signature }}",
+        "toRecipients": "={{ $json.email }}",
+        "subject": "={{ $('Parse Output').item.json.subject }}",
+        "bodyContent": "={{ $('Parse Output').item.json.body + \"<br>\" + $('Workflow Configuration').first().json.signature }}",
         "additionalFields": {
           "bodyContentType": "html"
         }
@@ -475,18 +456,20 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        2576,
-        96
+        1136,
+        576
       ],
       "id": "67540382-7be5-431a-8fa3-ce2cffe33db5",
       "name": "Send Note to Attendees",
       "webhookId": "56c12787-ced6-41e6-b6ed-17353c1e6982",
+      "retryOnFail": false,
       "credentials": {
         "microsoftOutlookOAuth2Api": {
           "id": "iqL1Tt6G6EOwOLPm",
           "name": "Microsoft Outlook account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -509,7 +492,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "processed": 1
+            "processed": 1,
+            "transcript": "={{ $('Parse Output').first().json.toJsonString() }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -622,6 +606,36 @@
               "type": "string",
               "readOnly": false,
               "removed": true
+            },
+            {
+              "id": "isEmailRead",
+              "displayName": "isEmailRead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "organizer",
+              "displayName": "organizer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -632,8 +646,8 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2800,
-        96
+        1312,
+        496
       ],
       "id": "9310b4b3-aae4-4338-9582-e9848bb6844c",
       "name": "Update Table (processed = 1)"
@@ -647,8 +661,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        208,
-        0
+        1216,
+        -352
       ],
       "id": "b02702b1-3652-4dbb-8af3-8b02716f627e",
       "name": "Recall Bot Status Webhook",
@@ -710,22 +724,22 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        432,
-        0
+        1440,
+        -352
       ],
       "id": "e82d878e-492b-4803-9f0e-098b92ab406e",
       "name": "Switch"
     },
     {
       "parameters": {
-        "content": "# Update Bot Status & Send Note to Attendees\n## This n8n workflow manages a meeting bot's status and actions. It splits incoming requests based on a Switch condition, updating either the join timestamp or the left timestamp of a meeting. The main sequence prepares meeting data, computes effective leave data, gets a transcript, processes the information using an AI Agent, parses the output, sends notifications to attendees, and finally stores the processed data in a table.",
-        "height": 720,
-        "width": 3168
+        "content": "# Update Bot Status & Send Note to Attendees\n## This n8n workflow manages a meeting bot's status and actions. It splits incoming requests based on a Switch condition, updating either the join timestamp or the left timestamp of a meeting. The main sequence prepares meeting data, computes effective leave data, gets a transcript, processes the information using an AI Agent, parses the output, sends notifications to attendees, stores the processed data in a table, and post the  notes to teams.",
+        "height": 256,
+        "width": 1552
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        96,
-        -336
+        1120,
+        -1120
       ],
       "typeVersion": 1,
       "id": "ccf97a14-61ab-46d7-8da3-757710d14626",
@@ -743,8 +757,8 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        3008,
-        96
+        1520,
+        496
       ],
       "id": "bd23670d-c9fc-4251-8cc4-f54f234e52ea",
       "name": "Delete Invitation Email",
@@ -767,8 +781,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        880,
-        640
+        2000,
+        496
       ]
     },
     {
@@ -781,8 +795,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        640,
-        640
+        1760,
+        496
       ],
       "id": "f426db00-1fcd-4686-b054-eee95431ac38",
       "name": "Get all Teams",
@@ -803,8 +817,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        2448,
-        640
+        1504,
+        928
       ],
       "id": "7a2c962a-cb31-4f0a-9e59-9101d6bfc924",
       "name": "Get Teams Primary Channel",
@@ -825,8 +839,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1104,
-        640
+        2224,
+        496
       ],
       "id": "2e165735-9a09-4b93-a0e6-4c408c5de1ec",
       "name": "Get Client Teams Tags",
@@ -847,8 +861,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1312,
-        640
+        2432,
+        496
       ],
       "id": "76798267-260c-45a6-85c3-68358dae4dd6",
       "name": "Get Client Team Members",
@@ -866,8 +880,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2208,
-        640
+        1264,
+        928
       ],
       "id": "4085e665-06b7-4fe5-8e3f-239bfc424c53",
       "name": "Filter Teams to Post Note"
@@ -882,8 +896,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1760,
-        640
+        816,
+        928
       ],
       "id": "b68ebf61-4dd7-4e8d-81aa-b54fbc523870",
       "name": "Get User Email",
@@ -901,8 +915,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1536,
-        640
+        592,
+        928
       ],
       "id": "704f79e5-3fd5-4ce9-b51e-41d9cd9a03d6",
       "name": "Split Client Teams Members"
@@ -914,8 +928,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1968,
-        640
+        1024,
+        928
       ],
       "id": "2a0748fa-310a-4f6d-ba9b-790b6391f6da",
       "name": "Add Email Address"
@@ -937,14 +951,14 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"body\": {\n    \"contentType\": \"html\",\n    \"content\": \"{{ \"<b>\" + $('Parse Output').first().json.subject + \"</b><br>\" + $('Parse Output').first().json.body.replace(/\\n/g, '<br>') }}\"\n  }\n}\n\n",
+        "jsonBody": "={\n  \"body\": {\n    \"contentType\": \"html\",\n    \"content\": \"{{ \n      \"<h1><b>\" \n      + $('Parse Output').first().json.subject \n      + \"</b></h1>\" \n      + $('Parse Output').first().json.body\n        .replace(/\\\\/g, \"\\\\\\\\\")\n        .replace(/\"/g, '\\\\\"')\n        .replace(/\\n/g, \"\\\\n\")\n        .replace(/\\r/g, \"\")\n    }}\"\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        2656,
-        640
+        1712,
+        928
       ],
       "id": "d4896c1b-9f8e-4a31-af12-d4478fcc18e5",
       "name": "Post a Note to Teams",
@@ -957,18 +971,314 @@
     },
     {
       "parameters": {
-        "content": "## Post the note to the Teams where the attendees belong.",
-        "height": 480,
-        "width": 3184
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
       "position": [
-        96,
-        464
+        864,
+        496
       ],
-      "typeVersion": 1,
-      "id": "defd19c6-22a6-481f-a235-f8022d4a660f",
-      "name": "Sticky Note1"
+      "id": "618c6815-a088-4686-be2d-053c931005f6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const katie_email = $('Workflow Configuration').first().json.katie_email;\nconst attendees = JSON.parse(\n  $(\"Compute WordLimit + EffectiveLeave\").first().json.attendees,\n);\n\nreturn attendees\n  .filter(email => email !== katie_email)\n  .map(email => ({\n    json: { email }\n  }));\n// return [\n//   {\n//     json: { email: \"jake@masterstouchweb.com\" },\n//   },\n//   // {\n//   //   json: { email: \"RicardoA@masterstouchweb.com\" },\n//   // },\n//   {\n//     json: { email: \"ricardo.alvaradob88@gmail.com\" },\n//   }\n// ]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        496
+      ],
+      "id": "debc9ebc-9397-459b-9faa-84731ee6a866",
+      "name": "Get Emails"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "3FL0YLoRyCgv9qnC",
+          "mode": "list",
+          "cachedResultName": "Katie Meeting",
+          "cachedResultUrl": "/projects/EkpdkMs5fMOnKaV6/datatables/3FL0YLoRyCgv9qnC"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $('Compute WordLimit + EffectiveLeave').first().json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "teamsMessageIds": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "meetingId",
+              "displayName": "meetingId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "startTime",
+              "displayName": "startTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "endTime",
+              "displayName": "endTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "joinUrl",
+              "displayName": "joinUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "join_timestamp",
+              "displayName": "join_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "left_timestamp",
+              "displayName": "left_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "email_id",
+              "displayName": "email_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "processed",
+              "displayName": "processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "recallBotId",
+              "displayName": "recallBotId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "isEmailRead",
+              "displayName": "isEmailRead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "organizer",
+              "displayName": "organizer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "reminderSent",
+              "displayName": "reminderSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "teamsMessageIds",
+              "displayName": "teamsMessageIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        928
+      ],
+      "id": "4d7099b0-2419-4daa-b35c-98bd405531ec",
+      "name": "Set Message ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst output = [];\n\nitems.forEach((item) => {\n  output.push({\n    teamId: item.json.channelIdentity?.teamId,\n    channelId: item.json.channelIdentity?.channelId,\n    messageId: item.json.id,\n  });\n});\n\nreturn {\n  json: {\n    output: JSON.stringify(output),\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        928
+      ],
+      "id": "8d59b521-27bd-489a-9d13-b2ca14688ce9",
+      "name": "Build Message ID Object"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-opus-4-5-20251101",
+          "mode": "list",
+          "cachedResultName": "Claude Opus 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2064,
+        256
+      ],
+      "id": "175265c4-d8bb-4cdb-927e-dec7c345f385",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "zKQFgf9Z4HyC4Ewg",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://graph.microsoft.com/v1.0/me/joinedTeams",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1248,
+        64
+      ],
+      "id": "a148dbbb-30e4-45a8-8752-bc56dd95a4d8",
+      "name": "Get Teams",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "ssSPNX2xiJcJTb0m",
+          "name": "Microsoft Graph - Authorize Code"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const teams = $input.first().json.value;\n\nlet teamNames = [];\n\nteams.forEach(item => {\n  teamNames.push(item.displayName);\n})\n\nreturn {\n  json: {\n    teamNames,\n  },\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        64
+      ],
+      "id": "64b82672-3c3c-4995-9c3c-558af1bfac8e",
+      "name": "Extract Names"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input shape:\n// {\n//   meetingId: \"xxx\",\n//   transcriptText: [ { participant, words: [...] }, ... ]\n// }\n//\n// Output:\n// {\n//   meetingId: \"xxx\",\n//   transcriptText: [ { speaker, text, t? }, ... ]\n// }\n\nconst item = $input.first().json;\n\nconst meetingId = item.meetingId;\nconst raw = JSON.parse(item.transcriptText);\n\n// Guard\nif (!Array.isArray(raw)) {\n  throw new Error('transcriptText must be an array of Recall segments');\n}\n\nfunction wordsToText(words = []) {\n  return words\n    .map(w => w?.text ?? '')\n    .filter(Boolean)\n    .join(' ')\n    .replace(/\\s+([.,!?;:])/g, '$1')\n    .replace(/\\s+'/g, \"'\")\n    .trim();\n}\n\nconst transcriptText = raw\n  .map(seg => {\n    const speaker =\n      seg?.participant?.name ??\n      (seg?.participant?.id != null ? `Participant ${seg.participant.id}` : 'Unknown');\n\n    const text = wordsToText(seg.words);\n    if (!text) return null;\n\n    // Optional single timestamp range per segment\n    const start = seg.words?.[0]?.start_timestamp?.relative;\n    const end = seg.words?.[seg.words.length - 1]?.end_timestamp?.relative;\n\n    return {\n      speaker,\n      text,\n      ...(start != null && end != null\n        ? { t: [Number(start.toFixed(2)), Number(end.toFixed(2))] }\n        : {})\n    };\n  })\n  .filter(Boolean);\n\nreturn [\n  {\n    json: {\n      meetingId,\n      transcriptText,\n      teamNames: $('Extract Names').first().json.teamNames\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        64
+      ],
+      "id": "0885d21b-defd-4e28-a834-9d16eaf6fa10",
+      "name": "Optimize Transcript"
     }
   ],
   "pinData": {},
@@ -999,7 +1309,7 @@
       "main": [
         [
           {
-            "node": "Get Transcript",
+            "node": "Get Teams",
             "type": "main",
             "index": 0
           }
@@ -1010,7 +1320,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Optimize Transcript",
             "type": "main",
             "index": 0
           }
@@ -1028,22 +1338,11 @@
         ]
       ]
     },
-    "xAI Grok Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Parse Output": {
       "main": [
         [
           {
-            "node": "Send Note to Attendees",
+            "node": "Get Emails",
             "type": "main",
             "index": 0
           }
@@ -1054,7 +1353,7 @@
       "main": [
         [
           {
-            "node": "Update Table (processed = 1)",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -1221,6 +1520,101 @@
           }
         ]
       ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Update Table (processed = 1)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Note to Attendees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post a Note to Teams": {
+      "main": [
+        [
+          {
+            "node": "Build Message ID Object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message ID Object": {
+      "main": [
+        [
+          {
+            "node": "Set Message ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Teams": {
+      "main": [
+        [
+          {
+            "node": "Extract Names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Names": {
+      "main": [
+        [
+          {
+            "node": "Get Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optimize Transcript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1228,7 +1622,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "24838623-6383-4444-97c0-966616688110",
+  "versionId": "c7f0b1c0-af9f-4f67-8395-1fa26feec770",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"

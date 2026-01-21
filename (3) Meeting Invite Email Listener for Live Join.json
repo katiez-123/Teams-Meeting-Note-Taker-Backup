@@ -414,13 +414,13 @@
     {
       "parameters": {
         "content": "## Meeting Invite Email Listener for Live Join\n### This workflow automatically listens for new Microsoft Teams meeting invitations received via email, extracts meeting details, updates the email status, and orchestrates the joining and saving of meeting data via a bot.",
-        "height": 704,
-        "width": 2272
+        "height": 176,
+        "width": 544
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        528,
-        416
+        1072,
+        304
       ],
       "typeVersion": 1,
       "id": "a40f1402-9814-418b-9d68-0ebebd831a5d",
@@ -744,7 +744,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "ae71e160-1cde-408f-877a-df8666e9af38",
+  "versionId": "a8b56886-606b-475c-ae25-f64ac422415f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"

@@ -148,7 +148,9 @@
             "joinUrl": "={{ $('Extract Meeting Details').item.json.joinUrl }}",
             "attendees": "={{ $('Extract Meeting Details').item.json.attendeesStr }}",
             "recallBotId": "={{ $json.recallBotId }}",
-            "email_id": "={{ $('Extract Meeting Details').item.json.email_id }}"
+            "email_id": "={{ $('Extract Meeting Details').item.json.email_id }}",
+            "isEmailRead": false,
+            "organizer": "={{ $('Extract Meeting Details').item.json.organizer }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -255,6 +257,26 @@
             {
               "id": "recallBotId",
               "displayName": "recallBotId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "isEmailRead",
+              "displayName": "isEmailRead",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "organizer",
+              "displayName": "organizer",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -466,7 +488,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "436e9e99-9175-46d9-8acd-b63fe3cc359f",
+  "versionId": "085cad7f-d9a5-423a-ad12-5a0ad785be3c",
   "meta": {
     "instanceId": "b87a9ffede84f6e2e99ef9ba12576a51d02db4c4e605200cfe4d1546834d5cc7"
   },
